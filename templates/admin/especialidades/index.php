@@ -1,3 +1,4 @@
+```php
 <?php
 
 /*
@@ -13,6 +14,12 @@ require_once "../../../config/conexao.php";
 require_once "../../../includes/verificar_admin.php";
 
 
+/*
+|--------------------------------------------------------------------------
+| Busca as especialidades
+|--------------------------------------------------------------------------
+*/
+
 $sql = "SELECT
             id,
             nome,
@@ -21,7 +28,6 @@ $sql = "SELECT
             created_at
         FROM especialidades
         ORDER BY nome ASC";
-
 
 $stmt = $conn->prepare($sql);
 
@@ -38,133 +44,305 @@ $resultado = $stmt->get_result();
 
     <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Especialidades</title>
+
+    <link
+        rel="stylesheet"
+        href="../../../public/css/app.css"
+    >
 
 </head>
 
 <body>
 
-<h1>Especialidades Médicas</h1>
+<div class="layout">
+
+    <!-- ==========================================================
+         MENU LATERAL
+    =========================================================== -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            Clínica Vida+
+
+            <small>Administrador</small>
+
+        </div>
+
+        <nav class="nav">
+
+            <a href="../dashboard.php">
+                Dashboard
+            </a>
+
+            <a href="../usuarios/index.php">
+                Usuários
+            </a>
+
+            <a href="../medicos/index.php">
+                Médicos
+            </a>
+
+            <a class="active" href="index.php">
+                Especialidades
+            </a>
+
+            <a href="../horarios/index.php">
+                Horários
+            </a>
+
+            <a href="../relatorios.php">
+                Relatórios
+            </a>
+
+            <a href="../../../logout.php">
+                Sair
+            </a>
+
+        </nav>
+
+    </aside>
 
 
-<?php
+    <!-- ==========================================================
+         CONTEÚDO PRINCIPAL
+    =========================================================== -->
 
-if (isset($_SESSION["erro"])) {
+    <main class="main">
 
-    echo "<p style='color:red'>" . $_SESSION["erro"] . "</p>";
+        <div class="topbar">
 
-    unset($_SESSION["erro"]);
+            <div>
 
-}
+                <h1>Especialidades Médicas</h1>
 
+                <div class="user">
+                    Gerencie as especialidades cadastradas
+                </div>
 
-if (isset($_SESSION["sucesso"])) {
+            </div>
 
-    echo "<p style='color:green'>" . $_SESSION["sucesso"] . "</p>";
+            <div class="user">
 
-    unset($_SESSION["sucesso"]);
+                <?= htmlspecialchars($_SESSION["nome"] ?? "") ?>
 
-}
+            </div>
 
-?>
-
-
-<a href="cadastrar.php">
-    Cadastrar Especialidade
-</a>
-
-
-<br><br>
+        </div>
 
 
-<table border="1" cellpadding="8">
+        <!-- ======================================================
+             MENSAGENS
+        ======================================================= -->
 
-    <thead>
+        <?php if (isset($_SESSION["erro"])): ?>
 
-        <tr>
+            <div class="alert alert-error">
 
-            <th>ID</th>
+                <?= htmlspecialchars($_SESSION["erro"]) ?>
 
-            <th>Nome</th>
+            </div>
 
-            <th>Descrição</th>
+            <?php unset($_SESSION["erro"]); ?>
 
-            <th>Status</th>
-
-            <th>Data de Cadastro</th>
-
-            <th>Ações</th>
-
-        </tr>
-
-    </thead>
+        <?php endif; ?>
 
 
-    <tbody>
+        <?php if (isset($_SESSION["sucesso"])): ?>
 
-    <?php while ($especialidade = $resultado->fetch_assoc()): ?>
+            <div class="alert alert-success">
 
-        <tr>
+                <?= htmlspecialchars($_SESSION["sucesso"]) ?>
 
-            <td>
-                <?= $especialidade["id"]; ?>
-            </td>
+            </div>
 
-            <td>
-                <?= htmlspecialchars($especialidade["nome"]); ?>
-            </td>
+            <?php unset($_SESSION["sucesso"]); ?>
 
-            <td>
-                <?= htmlspecialchars($especialidade["descricao"] ?? ""); ?>
-            </td>
+        <?php endif; ?>
 
-            <td>
 
-                <?php if ($especialidade["ativo"] == 1): ?>
+        <!-- ======================================================
+             CARD PRINCIPAL
+        ======================================================= -->
 
-                    Ativa
+        <div class="card">
 
-                <?php else: ?>
+            <div class="card-header">
 
-                    Inativa
+                <div>
 
-                <?php endif; ?>
+                    <h2>Especialidades cadastradas</h2>
 
-            </td>
+                    <p>
+                        Visualize e gerencie as especialidades médicas.
+                    </p>
 
-            <td>
-                <?= $especialidade["created_at"]; ?>
-            </td>
+                </div>
 
-            <td>
-
-                <a href="editar.php?id=<?= $especialidade["id"]; ?>">
-                    Editar
+                <a
+                    class="btn btn-primary"
+                    href="cadastrar.php"
+                >
+                    + Cadastrar especialidade
                 </a>
 
+            </div>
 
-    |
 
-<a
-    href="../../../actions/especialidades/excluir.php?id=<?= $especialidade["id"]; ?>"
-    onclick="return confirm('Tem certeza que deseja excluir esta especialidade?');"
->
-    Excluir
-</a>
+            <!-- ==================================================
+                 TABELA
+            =================================================== -->
 
-</td>
-            </td>
+            <div class="table-container">
 
-        </tr>
+                <table>
 
-    <?php endwhile; ?>
+                    <thead>
 
-    </tbody>
+                        <tr>
 
-</table>
+                            <th>ID</th>
+
+                            <th>Nome</th>
+
+                            <th>Descrição</th>
+
+                            <th>Status</th>
+
+                            <th>Data de Cadastro</th>
+
+                            <th>Ações</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                    <?php if ($resultado->num_rows > 0): ?>
+
+                        <?php while ($especialidade = $resultado->fetch_assoc()): ?>
+
+                            <tr>
+
+                                <td>
+                                    <?= (int) $especialidade["id"] ?>
+                                </td>
+
+
+                                <td>
+
+                                    <strong>
+                                        <?= htmlspecialchars($especialidade["nome"]) ?>
+                                    </strong>
+
+                                </td>
+
+
+                                <td>
+
+                                    <?= htmlspecialchars(
+                                        $especialidade["descricao"] ?? ""
+                                    ) ?>
+
+                                </td>
+
+
+                                <td>
+
+                                    <?php if ($especialidade["ativo"] == 1): ?>
+
+                                        <span class="status status-active">
+                                            Ativa
+                                        </span>
+
+                                    <?php else: ?>
+
+                                        <span class="status status-inactive">
+                                            Inativa
+                                        </span>
+
+                                    <?php endif; ?>
+
+                                </td>
+
+
+                                <td>
+
+                                    <?= htmlspecialchars(
+                                        $especialidade["created_at"]
+                                    ) ?>
+
+                                </td>
+
+
+                                <td>
+
+                                    <div class="actions">
+
+                                        <a
+                                            class="btn btn-secondary"
+                                            href="editar.php?id=<?= (int) $especialidade["id"] ?>"
+                                        >
+                                            Editar
+                                        </a>
+
+
+                                        <a
+                                            class="btn btn-danger"
+                                            href="../../../actions/especialidades/excluir.php?id=<?= (int) $especialidade["id"] ?>"
+                                            onclick="return confirm('Tem certeza que deseja excluir esta especialidade?');"
+                                        >
+                                            Excluir
+                                        </a>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        <?php endwhile; ?>
+
+                    <?php else: ?>
+
+                        <tr>
+
+                            <td
+                                colspan="6"
+                                class="empty"
+                            >
+                                Nenhuma especialidade cadastrada.
+                            </td>
+
+                        </tr>
+
+                    <?php endif; ?>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<script src="../../../public/js/app.js"></script>
 
 </body>
 
 </html>
+```

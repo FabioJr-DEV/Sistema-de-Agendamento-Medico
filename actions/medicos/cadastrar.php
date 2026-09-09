@@ -184,28 +184,28 @@ try {
 
     $senha = password_hash("medico123", PASSWORD_DEFAULT);
 
-    $perfil = "Medico";
+$perfil = "Medico";
 
+$primeiro_acesso = 1;
 
-    $sql = "INSERT INTO usuarios
-                (nome, email, senha, perfil)
-            VALUES (?, ?, ?, ?)";
+$sql = "INSERT INTO usuarios
+            (nome, email, senha, perfil, primeiro_acesso)
+        VALUES (?, ?, ?, ?, ?)";
 
+$stmt = $conn->prepare($sql);
 
-    $stmt = $conn->prepare($sql);
+$stmt->bind_param(
+    "ssssi",
+    $nome,
+    $email,
+    $senha,
+    $perfil,
+    $primeiro_acesso
+);
 
-    $stmt->bind_param(
-        "ssss",
-        $nome,
-        $email,
-        $senha,
-        $perfil
-    );
+$stmt->execute();
 
-    $stmt->execute();
-
-
-    $usuario_id = $conn->insert_id;
+$usuario_id = $conn->insert_id;
 
 
     /*

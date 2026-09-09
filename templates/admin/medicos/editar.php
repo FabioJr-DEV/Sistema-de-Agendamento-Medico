@@ -1,3 +1,4 @@
+```php
 <?php
 
 /*
@@ -5,10 +6,9 @@
 | Página: editar médico
 |--------------------------------------------------------------------------
 | Objetivo:
-| Exibir os dados atuais de um médico para edição.
+| Exibir o formulário de edição dos dados de um médico.
 |--------------------------------------------------------------------------
 */
-
 
 require_once "../../../includes/verificar_admin.php";
 require_once "../../../config/conexao.php";
@@ -16,20 +16,23 @@ require_once "../../../config/conexao.php";
 
 /*
 |--------------------------------------------------------------------------
-| Verifica o ID recebido
+| Verifica se o ID foi informado
 |--------------------------------------------------------------------------
 */
 
-if (!isset($_GET["id"]) || !is_numeric($_GET["id"])) {
-
-    $_SESSION["erro"] = "Médico inválido.";
+if (!isset($_GET["id"])) {
 
     header("Location: index.php");
     exit;
 }
 
+$id = (int) $_GET["id"];
 
-$medico_id = (int) $_GET["id"];
+if ($id <= 0) {
+
+    header("Location: index.php");
+    exit;
+}
 
 
 /*
@@ -40,45 +43,36 @@ $medico_id = (int) $_GET["id"];
 
 $sql = "SELECT
             m.id,
-            m.usuario_id,
+            u.nome,
+            u.email,
             m.crm_numero,
             m.crm_uf,
             m.telefone,
             m.ativo,
-            u.nome,
-            u.email,
             me.especialidade_id
-
         FROM medicos m
-
         INNER JOIN usuarios u
             ON u.id = m.usuario_id
-
         LEFT JOIN medicos_especialidades me
             ON me.medico_id = m.id
-
         WHERE m.id = ?";
-
 
 $stmt = $conn->prepare($sql);
 
-$stmt->bind_param("i", $medico_id);
+$stmt->bind_param("i", $id);
 
 $stmt->execute();
 
 $resultado = $stmt->get_result();
 
+$medico = $resultado->fetch_assoc();
 
-if ($resultado->num_rows === 0) {
 
-    $_SESSION["erro"] = "Médico não encontrado.";
+if (!$medico) {
 
     header("Location: index.php");
     exit;
 }
-
-
-$medico = $resultado->fetch_assoc();
 
 
 /*
@@ -90,13 +84,9 @@ $medico = $resultado->fetch_assoc();
 $sql = "SELECT
             id,
             nome
-
         FROM especialidades
-
         WHERE ativo = 1
-
         ORDER BY nome ASC";
-
 
 $stmt = $conn->prepare($sql);
 
@@ -107,226 +97,380 @@ $resultado_especialidades = $stmt->get_result();
 ?>
 
 <!DOCTYPE html>
-
 <html lang="pt-BR">
 
 <head>
 
     <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Editar Médico</title>
+
+    <link
+        rel="stylesheet"
+        href="../../../public/css/app.css"
+    >
 
 </head>
 
 <body>
 
-<h1>Editar Médico</h1>
+<div class="layout">
+
+    <!-- ==========================================================
+         MENU LATERAL
+    =========================================================== -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            Clínica Vida+
+
+            <small>Administrador</small>
+
+        </div>
+
+        <nav class="nav">
+
+            <a href="../dashboard.php">
+                Dashboard
+            </a>
+
+            <a href="../usuarios/index.php">
+                Usuários
+            </a>
+
+            <a class="active" href="index.php">
+                Médicos
+            </a>
+
+            <a href="../especialidades/index.php">
+                Especialidades
+            </a>
+
+            <a href="../horarios/index.php">
+                Horários
+            </a>
+
+            <a href="../relatorios.php">
+                Relatórios
+            </a>
+
+            <a href="../../../logout.php">
+                Sair
+            </a>
+
+        </nav>
+
+    </aside>
 
 
-<?php
+    <!-- ==========================================================
+         CONTEÚDO PRINCIPAL
+    =========================================================== -->
 
-if (isset($_SESSION["erro"])) {
+    <main class="main">
 
-    echo "<p style='color: red;'>"
-        . htmlspecialchars($_SESSION["erro"])
-        . "</p>";
+        <div class="topbar">
 
-    unset($_SESSION["erro"]);
-}
+            <div>
 
-?>
+                <h1>Editar Médico</h1>
 
+                <div class="user">
+                    Atualize os dados do médico
+                </div>
 
-<form
-    action="../../../actions/medicos/editar.php"
-    method="POST"
->
+            </div>
 
+            <div class="user">
 
-    <!-- ID do médico -->
+                <?= htmlspecialchars($_SESSION["nome"] ?? "") ?>
 
-    <input
-        type="hidden"
-        name="medico_id"
-        value="<?= $medico["id"]; ?>"
-    >
+            </div>
+
+        </div>
 
 
-    <h3>Dados do médico</h3>
+        <!-- ======================================================
+             MENSAGENS
+        ======================================================= -->
+
+        <?php if (isset($_SESSION["erro"])): ?>
+
+            <div class="alert alert-error">
+
+                <?= htmlspecialchars($_SESSION["erro"]) ?>
+
+            </div>
+
+            <?php unset($_SESSION["erro"]); ?>
+
+        <?php endif; ?>
 
 
-    <label for="nome">
-        Nome:
-    </label>
+        <?php if (isset($_SESSION["sucesso"])): ?>
 
-    <br>
+            <div class="alert alert-success">
 
-    <input
-        type="text"
-        id="nome"
-        name="nome"
-        value="<?= htmlspecialchars($medico["nome"]); ?>"
-        maxlength="100"
-        required
-    >
+                <?= htmlspecialchars($_SESSION["sucesso"]) ?>
 
-    <br><br>
+            </div>
+
+            <?php unset($_SESSION["sucesso"]); ?>
+
+        <?php endif; ?>
 
 
-    <label for="email">
-        E-mail:
-    </label>
+        <!-- ======================================================
+             FORMULÁRIO
+        ======================================================= -->
 
-    <br>
+        <div class="card">
 
-    <input
-        type="email"
-        id="email"
-        name="email"
-        value="<?= htmlspecialchars($medico["email"]); ?>"
-        maxlength="150"
-        required
-    >
+            <div class="card-header">
 
-    <br><br>
+                <div>
 
+                    <h2>Dados do médico</h2>
 
-    <label for="crm_numero">
-        Número do CRM:
-    </label>
+                    <p>
+                        Altere as informações necessárias e salve as alterações.
+                    </p>
 
-    <br>
+                </div>
 
-    <input
-        type="text"
-        id="crm_numero"
-        name="crm_numero"
-        value="<?= htmlspecialchars($medico["crm_numero"]); ?>"
-        maxlength="20"
-        required
-    >
-
-    <br><br>
+            </div>
 
 
-    <label for="crm_uf">
-        UF do CRM:
-    </label>
-
-    <br>
-
-    <input
-        type="text"
-        id="crm_uf"
-        name="crm_uf"
-        value="<?= htmlspecialchars($medico["crm_uf"]); ?>"
-        maxlength="2"
-        required
-    >
-
-    <br><br>
-
-
-    <label for="telefone">
-        Telefone:
-    </label>
-
-    <br>
-
-    <input
-        type="text"
-        id="telefone"
-        name="telefone"
-        value="<?= htmlspecialchars($medico["telefone"] ?? ""); ?>"
-        maxlength="20"
-    >
-
-    <br><br>
-
-    <label for="ativo">
-    Status:
-</label>
-
-<br>
-
-<select
-    id="ativo"
-    name="ativo"
-    required
->
-
-    <option
-        value="1"
-        <?= ($medico["ativo"] == 1) ? "selected" : ""; ?>
-    >
-        Ativo
-    </option>
-
-    <option
-        value="0"
-        <?= ($medico["ativo"] == 0) ? "selected" : ""; ?>
-    >
-        Inativo
-    </option>
-
-</select>
-
-<br><br>
-
-    <label for="especialidade_id">
-        Especialidade:
-    </label>
-
-    <br>
-
-    <select
-        id="especialidade_id"
-        name="especialidade_id"
-        required
-    >
-
-        <option value="">
-            Selecione uma especialidade
-        </option>
-
-
-        <?php while ($especialidade = $resultado_especialidades->fetch_assoc()): ?>
-
-            <option
-                value="<?= $especialidade["id"]; ?>"
-                <?= (
-                    $especialidade["id"] == $medico["especialidade_id"]
-                ) ? "selected" : ""; ?>
+            <form
+                action="../../../actions/medicos/editar.php"
+                method="POST"
             >
 
-                <?= htmlspecialchars($especialidade["nome"]); ?>
+                <!-- ID DO MÉDICO -->
 
-            </option>
-
-        <?php endwhile; ?>
-
-    </select>
-
-    <br><br>
+                <input
+                    type="hidden"
+                    name="medico_id"
+                    value="<?= (int) $medico["id"] ?>"
+                >
 
 
-    <button type="submit">
-        Salvar alterações
-    </button>
+                <div class="form-grid">
 
 
-</form>
+                    <!-- NOME -->
+
+                    <div class="field">
+
+                        <label for="nome">
+                            Nome *
+                        </label>
+
+                        <input
+                            type="text"
+                            id="nome"
+                            name="nome"
+                            maxlength="100"
+                            value="<?= htmlspecialchars($medico["nome"]) ?>"
+                            required
+                        >
+
+                    </div>
 
 
-<br>
+                    <!-- E-MAIL -->
+
+                    <div class="field">
+
+                        <label for="email">
+                            E-mail *
+                        </label>
+
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            maxlength="150"
+                            value="<?= htmlspecialchars($medico["email"]) ?>"
+                            required
+                        >
+
+                    </div>
 
 
-<a href="index.php">
-    Cancelar
-</a>
+                    <!-- CRM -->
+
+                    <div class="field">
+
+                        <label for="crm_numero">
+                            Número do CRM *
+                        </label>
+
+                        <input
+                            type="text"
+                            id="crm_numero"
+                            name="crm_numero"
+                            maxlength="20"
+                            value="<?= htmlspecialchars($medico["crm_numero"]) ?>"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- UF CRM -->
+
+                    <div class="field">
+
+                        <label for="crm_uf">
+                            UF do CRM *
+                        </label>
+
+                        <input
+                            type="text"
+                            id="crm_uf"
+                            name="crm_uf"
+                            maxlength="2"
+                            value="<?= htmlspecialchars($medico["crm_uf"]) ?>"
+                            style="text-transform: uppercase;"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- ESPECIALIDADE -->
+
+                    <div class="field">
+
+                        <label for="especialidade_id">
+                            Especialidade *
+                        </label>
+
+                        <select
+                            id="especialidade_id"
+                            name="especialidade_id"
+                            required
+                        >
+
+                            <option value="">
+                                Selecione uma especialidade
+                            </option>
+
+                            <?php while ($especialidade = $resultado_especialidades->fetch_assoc()): ?>
+
+                                <option
+                                    value="<?= (int) $especialidade["id"] ?>"
+                                    <?= ((int) $medico["especialidade_id"] === (int) $especialidade["id"]) ? "selected" : "" ?>
+                                >
+
+                                    <?= htmlspecialchars($especialidade["nome"]) ?>
+
+                                </option>
+
+                            <?php endwhile; ?>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- TELEFONE -->
+
+                    <div class="field">
+
+                        <label for="telefone">
+                            Telefone
+                        </label>
+
+                        <input
+                            type="text"
+                            id="telefone"
+                            name="telefone"
+                            maxlength="20"
+                            value="<?= htmlspecialchars($medico["telefone"] ?? "") ?>"
+                        >
+
+                    </div>
+
+
+                    <!-- STATUS -->
+
+                    <div class="field">
+
+                        <label for="ativo">
+                            Status *
+                        </label>
+
+                        <select
+                            id="ativo"
+                            name="ativo"
+                            required
+                        >
+
+                            <option
+                                value="1"
+                                <?= ((int) $medico["ativo"] === 1) ? "selected" : "" ?>
+                            >
+                                Ativo
+                            </option>
+
+                            <option
+                                value="0"
+                                <?= ((int) $medico["ativo"] === 0) ? "selected" : "" ?>
+                            >
+                                Inativo
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- ==================================================
+                     BOTÕES
+                =================================================== -->
+
+                <div class="actions">
+
+                    <a
+                        class="btn btn-secondary"
+                        href="index.php"
+                    >
+                        Cancelar
+                    </a>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        Salvar alterações
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<script src="../../../public/js/app.js"></script>
 
 </body>
 
 </html>
+```

@@ -1,3 +1,4 @@
+```php
 <?php
 
 /*
@@ -12,6 +13,12 @@
 require_once "../../../config/conexao.php";
 require_once "../../../includes/verificar_admin.php";
 
+
+/*
+|--------------------------------------------------------------------------
+| Busca especialidades ativas
+|--------------------------------------------------------------------------
+*/
 
 $sql = "SELECT
             id,
@@ -36,173 +43,334 @@ $resultado_especialidades = $stmt->get_result();
 
     <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <title>Cadastrar Médico</title>
+    <title>Novo Médico</title>
+
+    <link
+        rel="stylesheet"
+        href="../../../public/css/app.css"
+    >
 
 </head>
 
 <body>
 
-<h1>Cadastrar Médico</h1>
+<div class="layout">
+
+    <!-- MENU LATERAL -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            Clínica Vida+
+
+            <small>
+                Administrador
+            </small>
+
+        </div>
+
+        <nav class="nav">
+
+            <a href="../dashboard.php">
+                Dashboard
+            </a>
+
+            <a href="../usuarios/index.php">
+                Usuários
+            </a>
+
+            <a
+                href="index.php"
+                class="active"
+            >
+                Médicos
+            </a>
+
+            <a href="../especialidades/index.php">
+                Especialidades
+            </a>
+
+            <a href="../horarios/index.php">
+                Horários
+            </a>
+
+            <a href="../relatorios.php">
+                Relatórios
+            </a>
+
+            <a href="../../../logout.php">
+                Sair
+            </a>
+
+        </nav>
+
+    </aside>
 
 
-<?php
+    <!-- CONTEÚDO PRINCIPAL -->
 
-if (isset($_SESSION["erro"])) {
+    <main class="main">
 
-    echo "<p style='color:red'>" . htmlspecialchars($_SESSION["erro"]) . "</p>";
+        <div class="topbar">
 
-    unset($_SESSION["erro"]);
+            <div>
 
-}
+                <h1>
+                    Novo médico
+                </h1>
 
+                <p style="color: var(--muted); margin-top: 5px;">
+                    Cadastre um novo médico no sistema
+                </p>
 
-if (isset($_SESSION["sucesso"])) {
+            </div>
 
-    echo "<p style='color:green'>" . htmlspecialchars($_SESSION["sucesso"]) . "</p>";
+            <div class="user">
 
-    unset($_SESSION["sucesso"]);
+                <?= htmlspecialchars($_SESSION["nome"] ?? "") ?>
 
-}
+            </div>
 
-?>
-
-
-<form action="../../../actions/medicos/cadastrar.php" method="POST">
-
-
-    <label for="nome">
-        Nome:
-    </label>
-
-    <br>
-
-    <input
-        type="text"
-        id="nome"
-        name="nome"
-        maxlength="100"
-        required
-    >
-
-    <br><br>
+        </div>
 
 
-    <label for="crm_numero">
-        Número do CRM:
-    </label>
+        <!-- MENSAGENS -->
 
-    <br>
+        <?php if (isset($_SESSION["erro"])): ?>
 
-    <input
-        type="text"
-        id="crm_numero"
-        name="crm_numero"
-        maxlength="20"
-        required
-    >
+            <div class="alert alert-error">
 
-    <br><br>
+                <?= htmlspecialchars($_SESSION["erro"]) ?>
+
+            </div>
+
+            <?php unset($_SESSION["erro"]); ?>
+
+        <?php endif; ?>
 
 
-    <label for="crm_uf">
-        UF do CRM:
-    </label>
+        <?php if (isset($_SESSION["sucesso"])): ?>
 
-    <br>
+            <div class="alert alert-success">
 
-    <input
-        type="text"
-        id="crm_uf"
-        name="crm_uf"
-        maxlength="2"
-        required
-    >
+                <?= htmlspecialchars($_SESSION["sucesso"]) ?>
 
-    <br><br>
+            </div>
+
+            <?php unset($_SESSION["sucesso"]); ?>
+
+        <?php endif; ?>
 
 
-    <label for="especialidade_id">
-        Especialidade:
-    </label>
+        <!-- FORMULÁRIO -->
 
-    <br>
+        <div class="card">
 
-    <select
-        id="especialidade_id"
-        name="especialidade_id"
-        required
-    >
+            <div class="card-header">
 
-        <option value="">
-            Selecione uma especialidade
-        </option>
+                <div>
 
+                    <h2>
+                        Dados do médico
+                    </h2>
 
-        <?php while ($especialidade = $resultado_especialidades->fetch_assoc()): ?>
+                    <p>
+                        Preencha os dados abaixo para cadastrar o médico.
+                    </p>
 
-            <option value="<?= $especialidade["id"]; ?>">
+                </div>
 
-                <?= htmlspecialchars($especialidade["nome"]); ?>
-
-            </option>
-
-        <?php endwhile; ?>
-
-    </select>
-
-    <br><br>
+            </div>
 
 
-    <label for="telefone">
-        Telefone:
-    </label>
+            <form
+                action="../../../actions/medicos/cadastrar.php"
+                method="POST"
+            >
 
-    <br>
-
-    <input
-        type="text"
-        id="telefone"
-        name="telefone"
-        maxlength="20"
-    >
-
-    <br><br>
+                <div class="form-grid">
 
 
-    <label for="email">
-        E-mail:
-    </label>
+                    <!-- NOME -->
 
-    <br>
+                    <div class="field">
 
-    <input
-        type="email"
-        id="email"
-        name="email"
-        maxlength="150"
-        required
-    >
+                        <label for="nome">
+                            Nome completo
+                        </label>
 
-    <br><br>
+                        <input
+                            type="text"
+                            id="nome"
+                            name="nome"
+                            maxlength="100"
+                            placeholder="Digite o nome completo"
+                            required
+                        >
 
-
-    <button type="submit">
-        Cadastrar Médico
-    </button>
+                    </div>
 
 
-</form>
+                    <!-- CRM -->
+
+                    <div class="field">
+
+                        <label for="crm_numero">
+                            Número do CRM
+                        </label>
+
+                        <input
+                            type="text"
+                            id="crm_numero"
+                            name="crm_numero"
+                            maxlength="20"
+                            placeholder="Digite o número do CRM"
+                            required
+                        >
+
+                    </div>
 
 
-<br>
+                    <!-- UF -->
+
+                    <div class="field">
+
+                        <label for="crm_uf">
+                            UF do CRM
+                        </label>
+
+                        <input
+                            type="text"
+                            id="crm_uf"
+                            name="crm_uf"
+                            maxlength="2"
+                            placeholder="Ex.: RS"
+                            style="text-transform: uppercase;"
+                            required
+                        >
+
+                    </div>
 
 
-<a href="index.php">
-    Voltar para médicos
-</a>
+                    <!-- ESPECIALIDADE -->
+
+                    <div class="field">
+
+                        <label for="especialidade_id">
+                            Especialidade
+                        </label>
+
+                        <select
+                            id="especialidade_id"
+                            name="especialidade_id"
+                            required
+                        >
+
+                            <option value="">
+                                Selecione uma especialidade
+                            </option>
+
+                            <?php while ($especialidade = $resultado_especialidades->fetch_assoc()): ?>
+
+                                <option
+                                    value="<?= $especialidade["id"] ?>"
+                                >
+
+                                    <?= htmlspecialchars($especialidade["nome"]) ?>
+
+                                </option>
+
+                            <?php endwhile; ?>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- TELEFONE -->
+
+                    <div class="field">
+
+                        <label for="telefone">
+                            Telefone
+                        </label>
+
+                        <input
+                            type="text"
+                            id="telefone"
+                            name="telefone"
+                            maxlength="20"
+                            placeholder="Digite o telefone"
+                        >
+
+                    </div>
+
+
+                    <!-- E-MAIL -->
+
+                    <div class="field">
+
+                        <label for="email">
+                            E-mail
+                        </label>
+
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            maxlength="150"
+                            placeholder="Digite o e-mail"
+                            required
+                        >
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- BOTÕES -->
+
+                <div class="card-footer">
+
+                    <div class="actions">
+
+                        <a
+                            href="index.php"
+                            class="btn btn-secondary"
+                        >
+                            Cancelar
+                        </a>
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                        >
+                            Cadastrar médico
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<script src="../../../public/js/app.js"></script>
 
 </body>
 
 </html>
+```

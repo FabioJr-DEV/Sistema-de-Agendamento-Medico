@@ -1,35 +1,97 @@
+```php
 <?php
+
 require_once "../../includes/verificar_admin.php";
 require_once "../../config/conexao.php";
 
-// Relatório US031 – Todas as consultas
+
+// ============================================================
+// US031 – Todas as consultas
+// ============================================================
+
 $sql_todas_consultas = "
-    SELECT a.id, a.data_inicio, a.status, m.nome AS medico_nome, a.especialidade
-    FROM atendimentos a
-    LEFT JOIN medicos m ON a.medico_id = m.id
-    ORDER BY a.data_inicio DESC
+    SELECT
+        c.id,
+        CONCAT(c.data_consulta, ' ', c.horario) AS data_inicio,
+        c.status,
+        u.nome AS medico_nome,
+        GROUP_CONCAT(DISTINCT e.nome ORDER BY e.nome SEPARATOR ', ') AS especialidade
+    FROM consultas c
+    INNER JOIN medicos m
+        ON c.medico_id = m.id
+    INNER JOIN usuarios u
+        ON m.usuario_id = u.id
+    LEFT JOIN medicos_especialidades me
+        ON m.id = me.medico_id
+    LEFT JOIN especialidades e
+        ON me.especialidade_id = e.id
+    GROUP BY
+        c.id,
+        c.data_consulta,
+        c.horario,
+        c.status,
+        u.nome
+    ORDER BY c.data_consulta DESC, c.horario DESC
 ";
+
 $res_todas_consultas = $conn->query($sql_todas_consultas);
 
-// Relatório US032 – Consultas por Médico
+
+// ============================================================
+// US032 – Consultas por Médico
+// ============================================================
+
 $sql_consultas_por_medico = "
-    SELECT m.nome AS medico, COUNT(a.id) AS total_consultas
-    FROM atendimentos a
-    JOIN medicos m ON a.medico_id = m.id
-    GROUP BY m.nome
+    SELECT
+        u.nome AS medico,
+        COUNT(c.id) AS total_consultas
+    FROM consultas c
+    INNER JOIN medicos m
+        ON c.medico_id = m.id
+    INNER JOIN usuarios u
+        ON m.usuario_id = u.id
+    GROUP BY
+        m.id,
+        u.nome
     ORDER BY total_consultas DESC
 ";
+
 $res_consultas_por_medico = $conn->query($sql_consultas_por_medico);
 
-// Relatório US033 – Consultas por Especialidade
+
+// ============================================================
+// US033 – Consultas por Especialidade
+// ============================================================
+
 $sql_consultas_por_especialidade = "
-    SELECT a.especialidade, COUNT(a.id) AS total_consultas
-    FROM atendimentos a
-    GROUP BY a.especialidade
+    SELECT
+        e.nome AS especialidade,
+        COUNT(c.id) AS total_consultas
+    FROM consultas c
+    INNER JOIN medicos m
+        ON c.medico_id = m.id
+    INNER JOIN medicos_especialidades me
+        ON m.id = me.medico_id
+    INNER JOIN especialidades e
+        ON me.especialidade_id = e.id
+    GROUP BY
+        e.id,
+        e.nome
     ORDER BY total_consultas DESC
 ";
+
 $res_consultas_por_especialidade = $conn->query($sql_consultas_por_especialidade);
 
-if (!$res_todas_consultas || !$res_consultas_por_medico || !$res_consultas_por_especialidade) {
+
+// ============================================================
+// Verificação de erros
+// ============================================================
+
+if (
+    !$res_todas_consultas ||
+    !$res_consultas_por_medico ||
+    !$res_consultas_por_especialidade
+) {
     die("Erro ao executar consultas: " . $conn->error);
 }
+

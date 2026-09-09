@@ -1,3 +1,4 @@
+```php
 <?php
 
 /*
@@ -20,88 +21,233 @@ require_once "../../../includes/verificar_admin.php";
 
     <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Cadastrar Especialidade</title>
+
+    <link
+        rel="stylesheet"
+        href="../../../public/css/app.css"
+    >
 
 </head>
 
 <body>
 
-<h1>Cadastrar Especialidade</h1>
+<div class="layout">
+
+    <!-- ==========================================================
+         MENU LATERAL
+    =========================================================== -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            Clínica Vida+
+
+            <small>Administrador</small>
+
+        </div>
+
+        <nav class="nav">
+
+            <a href="../dashboard.php">
+                Dashboard
+            </a>
+
+            <a href="../usuarios/index.php">
+                Usuários
+            </a>
+
+            <a href="../medicos/index.php">
+                Médicos
+            </a>
+
+            <a class="active" href="index.php">
+                Especialidades
+            </a>
+
+            <a href="../horarios/index.php">
+                Horários
+            </a>
+
+            <a href="../relatorios.php">
+                Relatórios
+            </a>
+
+            <a href="../../../logout.php">
+                Sair
+            </a>
+
+        </nav>
+
+    </aside>
 
 
-<?php
+    <!-- ==========================================================
+         CONTEÚDO PRINCIPAL
+    =========================================================== -->
 
-if (isset($_SESSION["erro"])) {
+    <main class="main">
 
-    echo "<p style='color:red'>" . $_SESSION["erro"] . "</p>";
+        <div class="topbar">
 
-    unset($_SESSION["erro"]);
+            <div>
 
-}
+                <h1>Cadastrar Especialidade</h1>
 
+                <div class="user">
+                    Cadastre uma nova especialidade médica
+                </div>
 
-if (isset($_SESSION["sucesso"])) {
+            </div>
 
-    echo "<p style='color:green'>" . $_SESSION["sucesso"] . "</p>";
+            <div class="user">
 
-    unset($_SESSION["sucesso"]);
+                <?= htmlspecialchars($_SESSION["nome"] ?? "") ?>
 
-}
+            </div>
 
-?>
-
-
-<form action="../../../actions/especialidades/cadastrar.php" method="POST">
-
-
-    <label for="nome">
-        Nome da especialidade:
-    </label>
-
-    <br>
-
-    <input
-        type="text"
-        id="nome"
-        name="nome"
-        maxlength="100"
-        required
-    >
-
-    <br><br>
+        </div>
 
 
-    <label for="descricao">
-        Descrição:
-    </label>
+        <!-- ======================================================
+             MENSAGENS
+        ======================================================= -->
 
-    <br>
+        <?php if (isset($_SESSION["erro"])): ?>
 
-    <textarea
-        id="descricao"
-        name="descricao"
-        rows="5"
-        cols="40"
-    ></textarea>
+            <div class="alert alert-error">
 
-    <br><br>
+                <?= htmlspecialchars($_SESSION["erro"]) ?>
 
+            </div>
 
-    <button type="submit">
-        Cadastrar
-    </button>
+            <?php unset($_SESSION["erro"]); ?>
+
+        <?php endif; ?>
 
 
-</form>
+        <?php if (isset($_SESSION["sucesso"])): ?>
 
-<br>
+            <div class="alert alert-success">
 
-<a href="index.php">
-    Voltar para especialidades
-</a>
+                <?= htmlspecialchars($_SESSION["sucesso"]) ?>
+
+            </div>
+
+            <?php unset($_SESSION["sucesso"]); ?>
+
+        <?php endif; ?>
+
+
+        <!-- ======================================================
+             FORMULÁRIO
+        ======================================================= -->
+
+        <div class="card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h2>Nova especialidade</h2>
+
+                    <p>
+                        Informe os dados da especialidade que deseja cadastrar.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <form
+                action="../../../actions/especialidades/cadastrar.php"
+                method="POST"
+            >
+
+                <div class="form-grid">
+
+
+                    <!-- NOME -->
+
+                    <div class="field">
+
+                        <label for="nome">
+                            Nome da especialidade *
+                        </label>
+
+                        <input
+                            type="text"
+                            id="nome"
+                            name="nome"
+                            maxlength="100"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- DESCRIÇÃO -->
+
+                    <div class="field full">
+
+                        <label for="descricao">
+                            Descrição
+                        </label>
+
+                        <textarea
+                            id="descricao"
+                            name="descricao"
+                            rows="5"
+                            placeholder="Digite uma descrição para a especialidade..."
+                        ></textarea>
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- ==================================================
+                     BOTÕES
+                =================================================== -->
+
+                <div class="actions">
+
+                    <a
+                        class="btn btn-secondary"
+                        href="index.php"
+                    >
+                        Cancelar
+                    </a>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        Cadastrar especialidade
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<script src="../../../public/js/app.js"></script>
 
 </body>
 
 </html>
+```

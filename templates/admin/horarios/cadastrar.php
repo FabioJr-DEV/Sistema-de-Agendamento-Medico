@@ -1,3 +1,4 @@
+```php
 <?php
 
 /*
@@ -55,195 +56,333 @@ $resultado = $stmt->get_result();
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Cadastrar Horário</title>
+    <title>Definir Horário</title>
+
+    <link
+        rel="stylesheet"
+        href="../../../public/css/app.css"
+    >
 
 </head>
 
 <body>
 
-<h1>Definir Horário de Atendimento</h1>
+<div class="layout">
+
+    <!-- ==========================================================
+         MENU LATERAL
+    =========================================================== -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            Clínica Vida+
+
+            <small>Administrador</small>
+
+        </div>
+
+        <nav class="nav">
+
+            <a href="../dashboard.php">
+                Dashboard
+            </a>
+
+            <a href="../usuarios/index.php">
+                Usuários
+            </a>
+
+            <a href="../medicos/index.php">
+                Médicos
+            </a>
+
+            <a href="../especialidades/index.php">
+                Especialidades
+            </a>
+
+            <a class="active" href="index.php">
+                Horários
+            </a>
+
+            <a href="../relatorios.php">
+                Relatórios
+            </a>
+
+            <a href="../../../logout.php">
+                Sair
+            </a>
+
+        </nav>
+
+    </aside>
 
 
-<?php
+    <!-- ==========================================================
+         CONTEÚDO PRINCIPAL
+    =========================================================== -->
 
-if (isset($_SESSION["erro"])) {
+    <main class="main">
 
-    echo "<p style='color: red;'>"
-        . htmlspecialchars($_SESSION["erro"])
-        . "</p>";
+        <div class="topbar">
 
-    unset($_SESSION["erro"]);
-}
+            <div>
 
-?>
+                <h1>Definir Horário de Atendimento</h1>
 
+                <div class="user">
+                    Configure a disponibilidade de um médico
+                </div>
 
-<form
-    action="../../../actions/horarios/cadastrar.php"
-    method="POST"
->
+            </div>
 
+            <div class="user">
 
-    <label for="medico_id">
-        Médico:
-    </label>
+                <?= htmlspecialchars($_SESSION["nome"] ?? "") ?>
 
-    <br>
+            </div>
 
-    <select
-        id="medico_id"
-        name="medico_id"
-        required
-    >
-
-        <option value="">
-            Selecione o médico
-        </option>
+        </div>
 
 
-        <?php while ($medico = $resultado->fetch_assoc()): ?>
+        <!-- ======================================================
+             MENSAGEM DE ERRO
+        ======================================================= -->
 
-            <option value="<?= $medico["id"]; ?>">
+        <?php if (isset($_SESSION["erro"])): ?>
 
-                <?= htmlspecialchars($medico["nome"]); ?>
+            <div class="alert alert-error">
 
-            </option>
+                <?= htmlspecialchars($_SESSION["erro"]) ?>
 
-        <?php endwhile; ?>
+            </div>
 
-    </select>
+            <?php unset($_SESSION["erro"]); ?>
 
-    <br><br>
-
-
-    <label for="dia_semana">
-        Dia da semana:
-    </label>
-
-    <br>
-
-    <select
-        id="dia_semana"
-        name="dia_semana"
-        required
-    >
-
-        <option value="">
-            Selecione
-        </option>
-
-        <option value="0">
-            Domingo
-        </option>
-
-        <option value="1">
-            Segunda-feira
-        </option>
-
-        <option value="2">
-            Terça-feira
-        </option>
-
-        <option value="3">
-            Quarta-feira
-        </option>
-
-        <option value="4">
-            Quinta-feira
-        </option>
-
-        <option value="5">
-            Sexta-feira
-        </option>
-
-        <option value="6">
-            Sábado
-        </option>
-
-    </select>
-
-    <br><br>
+        <?php endif; ?>
 
 
-    <label for="hora_inicio">
-        Hora inicial:
-    </label>
+        <!-- ======================================================
+             FORMULÁRIO
+        ======================================================= -->
 
-    <br>
+        <div class="card">
 
-    <input
-        type="time"
-        id="hora_inicio"
-        name="hora_inicio"
-        required
-    >
+            <div class="card-header">
 
-    <br><br>
+                <div>
 
+                    <h2>Novo horário</h2>
 
-    <label for="hora_fim">
-        Hora final:
-    </label>
+                    <p>
+                        Defina o dia e o período em que o médico estará disponível.
+                    </p>
 
-    <br>
+                </div>
 
-    <input
-        type="time"
-        id="hora_fim"
-        name="hora_fim"
-        required
-    >
-
-    <br><br>
+            </div>
 
 
-    <label for="intervalo_minutos">
-        Intervalo entre atendimentos:
-    </label>
+            <form
+                action="../../../actions/horarios/cadastrar.php"
+                method="POST"
+            >
 
-    <br>
-
-    <select
-        id="intervalo_minutos"
-        name="intervalo_minutos"
-        required
-    >
-
-        <option value="15">
-            15 minutos
-        </option>
-
-        <option value="30" selected>
-            30 minutos
-        </option>
-
-        <option value="45">
-            45 minutos
-        </option>
-
-        <option value="60">
-            60 minutos
-        </option>
-
-    </select>
-
-    <br><br>
+                <div class="form-grid">
 
 
-    <button type="submit">
-        Cadastrar horário
-    </button>
+                    <!-- MÉDICO -->
 
-</form>
+                    <div class="field full">
+
+                        <label for="medico_id">
+                            Médico *
+                        </label>
+
+                        <select
+                            id="medico_id"
+                            name="medico_id"
+                            required
+                        >
+
+                            <option value="">
+                                Selecione o médico
+                            </option>
+
+                            <?php while ($medico = $resultado->fetch_assoc()): ?>
+
+                                <option
+                                    value="<?= (int) $medico["id"] ?>"
+                                >
+                                    <?= htmlspecialchars($medico["nome"]) ?>
+                                </option>
+
+                            <?php endwhile; ?>
+
+                        </select>
+
+                    </div>
 
 
-<br>
+                    <!-- DIA DA SEMANA -->
+
+                    <div class="field">
+
+                        <label for="dia_semana">
+                            Dia da semana *
+                        </label>
+
+                        <select
+                            id="dia_semana"
+                            name="dia_semana"
+                            required
+                        >
+
+                            <option value="">
+                                Selecione
+                            </option>
+
+                            <option value="0">
+                                Domingo
+                            </option>
+
+                            <option value="1">
+                                Segunda-feira
+                            </option>
+
+                            <option value="2">
+                                Terça-feira
+                            </option>
+
+                            <option value="3">
+                                Quarta-feira
+                            </option>
+
+                            <option value="4">
+                                Quinta-feira
+                            </option>
+
+                            <option value="5">
+                                Sexta-feira
+                            </option>
+
+                            <option value="6">
+                                Sábado
+                            </option>
+
+                        </select>
+
+                    </div>
 
 
-<a href="index.php">
-    Voltar
-</a>
+                    <!-- INTERVALO -->
+
+                    <div class="field">
+
+                        <label for="intervalo_minutos">
+                            Intervalo entre atendimentos *
+                        </label>
+
+                        <select
+                            id="intervalo_minutos"
+                            name="intervalo_minutos"
+                            required
+                        >
+
+                            <option value="15">
+                                15 minutos
+                            </option>
+
+                            <option value="30" selected>
+                                30 minutos
+                            </option>
+
+                            <option value="45">
+                                45 minutos
+                            </option>
+
+                            <option value="60">
+                                60 minutos
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- HORA INICIAL -->
+
+                    <div class="field">
+
+                        <label for="hora_inicio">
+                            Hora inicial *
+                        </label>
+
+                        <input
+                            type="time"
+                            id="hora_inicio"
+                            name="hora_inicio"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- HORA FINAL -->
+
+                    <div class="field">
+
+                        <label for="hora_fim">
+                            Hora final *
+                        </label>
+
+                        <input
+                            type="time"
+                            id="hora_fim"
+                            name="hora_fim"
+                            required
+                        >
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- ==================================================
+                     BOTÕES
+                =================================================== -->
+
+                <div class="actions">
+
+                    <a
+                        class="btn btn-secondary"
+                        href="index.php"
+                    >
+                        Cancelar
+                    </a>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        Cadastrar horário
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<script src="../../../public/js/app.js"></script>
 
 </body>
 
 </html>
+```

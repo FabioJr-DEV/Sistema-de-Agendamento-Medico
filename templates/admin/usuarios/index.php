@@ -1,4 +1,6 @@
+```php
 <?php
+
 /*
 |--------------------------------------------------------------------------
 | Página: index.php
@@ -14,54 +16,15 @@
 */
 
 require_once __DIR__ . "/../../../includes/verificar_admin.php";
-require_once(__DIR__ . "/../../../config/conexao.php");
+require_once __DIR__ . "/../../../config/conexao.php";
 
-if (isset($_SESSION["sucesso"])) { ?>
 
-    <div style="
-        background:#d4edda;
-        color:#155724;
-        border:1px solid #c3e6cb;
-        padding:12px;
-        margin-bottom:20px;
-        border-radius:6px;
-        font-weight:bold;
-    ">
-        ✔ <?= $_SESSION["sucesso"]; ?>
-    </div>
+/*
+|--------------------------------------------------------------------------
+| Busca os usuários
+|--------------------------------------------------------------------------
+*/
 
-<?php
-
-unset($_SESSION["sucesso"]);
-
-}
-
-?>
-
-<?php
-
-if (isset($_SESSION["erro"])) { ?>
-
-    <div style="
-        background:#f8d7da;
-        color:#721c24;
-        border:1px solid #f5c6cb;
-        padding:12px;
-        margin-bottom:20px;
-        border-radius:6px;
-        font-weight:bold;
-    ">
-        ✖ <?= $_SESSION["erro"]; ?>
-    </div>
-
-<?php
-
-unset($_SESSION["erro"]);
-
-}
-
-?>
-<?php
 $sql = "SELECT
             id,
             nome,
@@ -75,7 +38,9 @@ $stmt = $conn->prepare($sql);
 $stmt->execute();
 
 $resultado = $stmt->get_result();
+
 ?>
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -83,59 +48,315 @@ $resultado = $stmt->get_result();
 
     <meta charset="UTF-8">
 
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
     <title>Usuários</title>
+
+    <link
+        rel="stylesheet"
+        href="../../../public/css/app.css"
+    >
 
 </head>
 
 <body>
 
-<h1>Usuários Cadastrados</h1>
+<div class="layout">
 
-<table border="1" cellpadding="8">
+    <!-- MENU LATERAL -->
 
-    <tr>
+    <aside class="sidebar">
 
-        <th>ID</th>
-        <th>Nome</th>
-        <th>E-mail</th>
-        <th>Perfil</th>
-        <th>Data de Cadastro</th>
-        <th>Ações</th>
+        <div class="brand">
+
+            Clínica Vida+
+
+            <small>
+                Administrador
+            </small>
+
+        </div>
+
+        <nav class="nav">
+
+            <a href="../dashboard.php">
+                Dashboard
+            </a>
+
+            <a
+                href="index.php"
+                class="active"
+            >
+                Usuários
+            </a>
+
+            <a href="../medicos/index.php">
+                Médicos
+            </a>
+
+            <a href="../especialidades/index.php">
+                Especialidades
+            </a>
+
+            <a href="../horarios/index.php">
+                Horários
+            </a>
+
+            <a href="../relatorios.php">
+                Relatórios
+            </a>
+
+            <a href="../../../logout.php">
+                Sair
+            </a>
+
+        </nav>
+
+    </aside>
 
 
-    </tr>
+    <!-- CONTEÚDO PRINCIPAL -->
+
+    <main class="main">
+
+        <div class="topbar">
+
+            <div>
+
+                <h1>
+                    Usuários
+                </h1>
+
+                <p style="color: var(--muted); margin-top: 5px;">
+                    Gerenciamento dos usuários do sistema
+                </p>
+
+            </div>
+
+            <div class="user">
+
+                <?= htmlspecialchars($_SESSION["nome"] ?? "") ?>
+
+            </div>
+
+        </div>
+
+
+        <!-- MENSAGENS -->
+
+        <?php if (isset($_SESSION["sucesso"])): ?>
+
+            <div class="alert alert-success">
+
+                <?= htmlspecialchars($_SESSION["sucesso"]) ?>
+
+            </div>
+
+            <?php unset($_SESSION["sucesso"]); ?>
+
+        <?php endif; ?>
+
+
+        <?php if (isset($_SESSION["erro"])): ?>
+
+            <div class="alert alert-error">
+
+                <?= htmlspecialchars($_SESSION["erro"]) ?>
+
+            </div>
+
+            <?php unset($_SESSION["erro"]); ?>
+
+        <?php endif; ?>
+
+
+        <!-- CARD -->
+
+        <div class="card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h2>
+                        Usuários cadastrados
+                    </h2>
+
+                    <p>
+                        Consulte e gerencie os usuários do sistema.
+                    </p>
+
+                </div>
+
+                <a
+                    href="cadastrar.php"
+                    class="btn btn-primary"
+                >
+                    + Novo usuário
+                </a>
+
+            </div>
+
+
+            <!-- TABELA -->
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                ID
+                            </th>
+
+                            <th>
+                                Nome
+                            </th>
+
+                            <th>
+                                E-mail
+                            </th>
+
+                            <th>
+                                Perfil
+                            </th>
+
+                            <th>
+                                Data de cadastro
+                            </th>
+
+                            <th>
+                                Ações
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                    <?php if ($resultado->num_rows > 0): ?>
+
+                        <?php while ($usuario = $resultado->fetch_assoc()): ?>
+
+                            <tr>
+
+                                <td>
+                                    <?= htmlspecialchars($usuario["id"]) ?>
+                                </td>
+
+                                <td>
+
+                                    <strong>
+                                        <?= htmlspecialchars($usuario["nome"]) ?>
+                                    </strong>
+
+                                </td>
+
+                                <td>
+                                    <?= htmlspecialchars($usuario["email"]) ?>
+                                </td>
+
+                                <td>
+
+                                    <?php
+
+                                    $classePerfil = "badge-blue";
+
+                                    if ($usuario["perfil"] === "Administrador") {
+                                        $classePerfil = "badge-red";
+                                    } elseif ($usuario["perfil"] === "Medico") {
+                                        $classePerfil = "badge-green";
+                                    } elseif ($usuario["perfil"] === "Recepcionista") {
+                                        $classePerfil = "badge-yellow";
+                                    }
+
+                                    ?>
+
+                                    <span class="badge <?= $classePerfil ?>">
+
+                                        <?= htmlspecialchars($usuario["perfil"]) ?>
+
+                                    </span>
+
+                                </td>
+
+                                <td>
+
+                                    <?= date(
+                                        "d/m/Y H:i",
+                                        strtotime($usuario["created_at"])
+                                    ) ?>
+
+                                </td>
+
+                                <td>
+
+                                    <div class="actions" style="margin-top: 0;">
+
+                                        <a
+                                            href="editar.php?id=<?= $usuario["id"] ?>"
+                                            class="btn btn-secondary"
+                                        >
+                                            Editar
+                                        </a>
+
+                                        <a
+                                            href="../../../actions/usuarios/excluir.php?id=<?= $usuario["id"] ?>"
+                                            class="btn btn-danger"
+                                            onclick="return confirm('Tem certeza que deseja excluir este usuário?');"
+                                        >
+                                            Excluir
+                                        </a>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        <?php endwhile; ?>
+
+                    <?php else: ?>
+
+                        <tr>
+
+                            <td
+                                colspan="6"
+                                class="empty"
+                            >
+
+                                Nenhum usuário cadastrado.
+
+                            </td>
+
+                        </tr>
+
+                    <?php endif; ?>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<script src="../../../public/js/app.js"></script>
+
 </body>
 
 </html>
-
-<?php while ($usuario = $resultado->fetch_assoc()) : ?>
-    <tr>
-
-<td><?= $usuario["id"]; ?></td>
-
-<td><?= $usuario["nome"]; ?></td>
-
-<td><?= $usuario["email"]; ?></td>
-
-<td><?= $usuario["perfil"]; ?></td>
-
-<td><?= $usuario["created_at"]; ?></td>
-
-</tr>
-
-<td>
-
-    <a href="editar.php?id=<?= $usuario["id"]; ?>">
-        Editar
-    </a>
-
-    <a href="../../../actions/usuarios/excluir.php?id=<?= $usuario["id"]; ?>"
-   onclick="return confirm('Tem certeza que deseja excluir este usuário?');">
-    Excluir
-</a>
-
-</td>
-
-<?php endwhile; ?>
-
-</table>
+```

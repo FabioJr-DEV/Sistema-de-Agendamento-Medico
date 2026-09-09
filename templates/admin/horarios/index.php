@@ -1,3 +1,4 @@
+```php
 <?php
 
 /*
@@ -83,165 +84,305 @@ $dias_semana = [
 
     <title>Horários de Atendimento</title>
 
+    <link
+        rel="stylesheet"
+        href="../../../public/css/app.css"
+    >
+
 </head>
 
 <body>
 
-<h1>Horários de Atendimento</h1>
+<div class="layout">
+
+    <!-- ==========================================================
+         MENU LATERAL
+    =========================================================== -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            Clínica Vida+
+
+            <small>Administrador</small>
+
+        </div>
+
+        <nav class="nav">
+
+            <a href="../dashboard.php">
+                Dashboard
+            </a>
+
+            <a href="../usuarios/index.php">
+                Usuários
+            </a>
+
+            <a href="../medicos/index.php">
+                Médicos
+            </a>
+
+            <a href="../especialidades/index.php">
+                Especialidades
+            </a>
+
+            <a class="active" href="index.php">
+                Horários
+            </a>
+
+            <a href="../relatorios.php">
+                Relatórios
+            </a>
+
+            <a href="../../../logout.php">
+                Sair
+            </a>
+
+        </nav>
+
+    </aside>
 
 
-<?php
+    <!-- ==========================================================
+         CONTEÚDO PRINCIPAL
+    =========================================================== -->
 
-/*
-|--------------------------------------------------------------------------
-| Mensagem de sucesso
-|--------------------------------------------------------------------------
-*/
+    <main class="main">
 
-if (isset($_SESSION["sucesso"])) {
+        <div class="topbar">
 
-    echo "<p style='color: green;'>"
-        . htmlspecialchars($_SESSION["sucesso"])
-        . "</p>";
+            <div>
 
-    unset($_SESSION["sucesso"]);
-}
+                <h1>Horários de Atendimento</h1>
 
+                <div class="user">
+                    Gerencie os horários de atendimento dos médicos
+                </div>
 
-/*
-|--------------------------------------------------------------------------
-| Mensagem de erro
-|--------------------------------------------------------------------------
-*/
+            </div>
 
-if (isset($_SESSION["erro"])) {
+            <div class="user">
 
-    echo "<p style='color: red;'>"
-        . htmlspecialchars($_SESSION["erro"])
-        . "</p>";
+                <?= htmlspecialchars($_SESSION["nome"] ?? "") ?>
 
-    unset($_SESSION["erro"]);
-}
+            </div>
 
-?>
+        </div>
 
 
-<a href="cadastrar.php">
-    Definir novo horário
-</a>
+        <!-- ======================================================
+             MENSAGEM DE SUCESSO
+        ======================================================= -->
 
-<br><br>
+        <?php if (isset($_SESSION["sucesso"])): ?>
 
+            <div class="alert alert-success">
 
-<table border="1" cellpadding="8">
+                <?= htmlspecialchars($_SESSION["sucesso"]) ?>
 
-    <thead>
+            </div>
 
-        <tr>
+            <?php unset($_SESSION["sucesso"]); ?>
 
-            <th>Médico</th>
-
-            <th>Dia</th>
-
-            <th>Horário inicial</th>
-
-            <th>Horário final</th>
-
-            <th>Intervalo</th>
-
-            <th>Status</th>
-
-        </tr>
-
-    </thead>
+        <?php endif; ?>
 
 
-    <tbody>
+        <!-- ======================================================
+             MENSAGEM DE ERRO
+        ======================================================= -->
 
-    <?php if ($resultado->num_rows > 0): ?>
+        <?php if (isset($_SESSION["erro"])): ?>
 
-        <?php while ($horario = $resultado->fetch_assoc()): ?>
+            <div class="alert alert-error">
 
-            <tr>
+                <?= htmlspecialchars($_SESSION["erro"]) ?>
 
-                <td>
-                    <?= htmlspecialchars($horario["medico_nome"]); ?>
-                </td>
+            </div>
 
+            <?php unset($_SESSION["erro"]); ?>
 
-                <td>
-
-                    <?= htmlspecialchars(
-                        $dias_semana[$horario["dia_semana"]]
-                        ?? "Desconhecido"
-                    ); ?>
-
-                </td>
+        <?php endif; ?>
 
 
-                <td>
+        <!-- ======================================================
+             CARD PRINCIPAL
+        ======================================================= -->
 
-                    <?= htmlspecialchars(
-                        substr($horario["hora_inicio"], 0, 5)
-                    ); ?>
+        <div class="card">
 
-                </td>
+            <div class="card-header">
+
+                <div>
+
+                    <h2>Horários cadastrados</h2>
+
+                    <p>
+                        Consulte os horários de atendimento definidos para cada médico.
+                    </p>
+
+                </div>
+
+                <a
+                    class="btn btn-primary"
+                    href="cadastrar.php"
+                >
+                    + Definir novo horário
+                </a>
+
+            </div>
 
 
-                <td>
+            <!-- ==================================================
+                 TABELA
+            =================================================== -->
 
-                    <?= htmlspecialchars(
-                        substr($horario["hora_fim"], 0, 5)
-                    ); ?>
+            <div class="table-container">
 
-                </td>
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Médico</th>
+
+                            <th>Dia</th>
+
+                            <th>Horário inicial</th>
+
+                            <th>Horário final</th>
+
+                            <th>Intervalo</th>
+
+                            <th>Status</th>
+
+                        </tr>
+
+                    </thead>
 
 
-                <td>
+                    <tbody>
 
-                    <?= (int) $horario["intervalo_minutos"]; ?>
+                    <?php if ($resultado->num_rows > 0): ?>
 
-                    minutos
+                        <?php while ($horario = $resultado->fetch_assoc()): ?>
 
-                </td>
+                            <tr>
+
+                                <!-- MÉDICO -->
+
+                                <td>
+
+                                    <strong>
+                                        <?= htmlspecialchars(
+                                            $horario["medico_nome"]
+                                        ) ?>
+                                    </strong>
+
+                                </td>
 
 
-                <td>
+                                <!-- DIA -->
 
-                    <?php if ($horario["ativo"] == 1): ?>
+                                <td>
 
-                        Ativo
+                                    <?= htmlspecialchars(
+                                        $dias_semana[$horario["dia_semana"]]
+                                        ?? "Desconhecido"
+                                    ) ?>
+
+                                </td>
+
+
+                                <!-- HORÁRIO INICIAL -->
+
+                                <td>
+
+                                    <?= htmlspecialchars(
+                                        substr($horario["hora_inicio"], 0, 5)
+                                    ) ?>
+
+                                </td>
+
+
+                                <!-- HORÁRIO FINAL -->
+
+                                <td>
+
+                                    <?= htmlspecialchars(
+                                        substr($horario["hora_fim"], 0, 5)
+                                    ) ?>
+
+                                </td>
+
+
+                                <!-- INTERVALO -->
+
+                                <td>
+
+                                    <?= (int) $horario["intervalo_minutos"] ?>
+
+                                    minutos
+
+                                </td>
+
+
+                                <!-- STATUS -->
+
+                                <td>
+
+                                    <?php if ($horario["ativo"] == 1): ?>
+
+                                        <span class="status status-active">
+                                            Ativo
+                                        </span>
+
+                                    <?php else: ?>
+
+                                        <span class="status status-inactive">
+                                            Inativo
+                                        </span>
+
+                                    <?php endif; ?>
+
+                                </td>
+
+                            </tr>
+
+                        <?php endwhile; ?>
 
                     <?php else: ?>
 
-                        Inativo
+                        <tr>
+
+                            <td
+                                colspan="6"
+                                class="empty"
+                            >
+                                Nenhum horário cadastrado.
+                            </td>
+
+                        </tr>
 
                     <?php endif; ?>
 
-                </td>
+                    </tbody>
 
-            </tr>
+                </table>
 
-        <?php endwhile; ?>
+            </div>
 
-    <?php else: ?>
+        </div>
 
-        <tr>
+    </main>
 
-            <td colspan="6">
+</div>
 
-                Nenhum horário cadastrado.
 
-            </td>
-
-        </tr>
-
-    <?php endif; ?>
-
-    </tbody>
-
-</table>
+<script src="../../../public/js/app.js"></script>
 
 </body>
 
 </html>
+```

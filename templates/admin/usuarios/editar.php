@@ -1,3 +1,4 @@
+```php
 <?php
 /*
 |--------------------------------------------------------------------------
@@ -12,15 +13,13 @@ require_once "../../../includes/verificar_admin.php";
 require_once "../../../config/conexao.php";
 
 if (!isset($_GET["id"])) {
-
     header("Location: index.php");
     exit;
-
 }
 
-$id =(int) $_GET["id"];
+$id = (int) $_GET["id"];
 
-$sql ="SELECT
+$sql = "SELECT
             id,
             nome,
             email,
@@ -38,12 +37,10 @@ $resultado = $stmt->get_result();
 
 $usuario = $resultado->fetch_assoc();
 
-if (!$usuario) { 
-
+if (!$usuario) {
     header("Location: index.php");
     exit;
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -52,73 +49,209 @@ if (!$usuario) {
 <head>
 
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Editar Usuário</title>
+    <title>Editar Usuário - Administração</title>
+
+    <link rel="stylesheet" href="../../../public/css/app.css">
 
 </head>
 
 <body>
 
-    <h1>Editar Usuário</h1>
+<div class="layout">
 
-    <form action="../../../actions/usuarios/editar.php" method="POST">
+    <!-- MENU LATERAL -->
+    <aside class="sidebar">
 
-        <input
-            type="hidden"
-            name="id"
-            value="<?= $usuario["id"]; ?>">
+        <div class="brand">
+            Clínica Vida+
+            <small>Administração</small>
+        </div>
 
-        <label>Nome:</label><br>
+        <nav class="nav">
 
-        <input
-            type="text"
-            name="nome"
-            value="<?= htmlspecialchars($usuario["nome"]); ?>"
-            required>
+            <a href="../dashboard.php">
+                Dashboard
+            </a>
 
-        <br><br>
+            <a class="active" href="index.php">
+                Usuários
+            </a>
 
-        <label>E-mail:</label><br>
+            <a href="../medicos/index.php">
+                Médicos
+            </a>
 
-        <input
-            type="email"
-            name="email"
-            value="<?= htmlspecialchars($usuario["email"]); ?>"
-            required>
+            <a href="../especialidades/index.php">
+                Especialidades
+            </a>
 
-        <br><br>
+            <a href="../horarios/index.php">
+                Horários
+            </a>
 
-        <label>Perfil:</label><br>
+            <a href="../relatorios.php">
+                Relatórios
+            </a>
 
-        <select name="perfil" required>
+            <a href="../../../logout.php">
+                Sair
+            </a>
 
-            <option value="Administrador"
-                <?= $usuario["perfil"] == "Administrador" ? "selected" : ""; ?>>
-                Administrador
-            </option>
+        </nav>
 
-            <option value="Recepcionista"
-                <?= $usuario["perfil"] == "Recepcionista" ? "selected" : ""; ?>>
-                Recepcionista
-            </option>
+    </aside>
 
-            <option value="Medico"
-                <?= $usuario["perfil"] == "Medico" ? "selected" : ""; ?>>
-                Médico
-            </option>
 
-        </select>
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="main">
 
-        <br><br>
+        <div class="topbar">
 
-        <button type="submit">
+            <div>
+                <h1>Editar Usuário</h1>
+            </div>
 
-            Salvar Alterações
+            <div class="user">
+                <?= htmlspecialchars($_SESSION["nome"] ?? "") ?>
+            </div>
 
-        </button>
+        </div>
 
-    </form>
+
+        <!-- FORMULÁRIO -->
+        <div class="card">
+
+            <div class="card-header">
+
+                <div>
+                    <h2>Dados do usuário</h2>
+                    <p>Altere as informações do usuário selecionado.</p>
+                </div>
+
+            </div>
+
+
+            <form action="../../../actions/usuarios/editar.php" method="POST">
+
+                <input
+                    type="hidden"
+                    name="id"
+                    value="<?= htmlspecialchars($usuario["id"]) ?>"
+                >
+
+
+                <div class="form-grid">
+
+                    <!-- NOME -->
+                    <div class="field">
+
+                        <label for="nome">
+                            Nome
+                        </label>
+
+                        <input
+                            type="text"
+                            id="nome"
+                            name="nome"
+                            value="<?= htmlspecialchars($usuario["nome"]) ?>"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- E-MAIL -->
+                    <div class="field">
+
+                        <label for="email">
+                            E-mail
+                        </label>
+
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            value="<?= htmlspecialchars($usuario["email"]) ?>"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- PERFIL -->
+                    <div class="field">
+
+                        <label for="perfil">
+                            Perfil
+                        </label>
+
+                        <select
+                            id="perfil"
+                            name="perfil"
+                            required
+                        >
+
+                            <option
+                                value="Administrador"
+                                <?= $usuario["perfil"] == "Administrador" ? "selected" : "" ?>
+                            >
+                                Administrador
+                            </option>
+
+                            <option
+                                value="Recepcionista"
+                                <?= $usuario["perfil"] == "Recepcionista" ? "selected" : "" ?>
+                            >
+                                Recepcionista
+                            </option>
+
+                            <option
+                                value="Medico"
+                                <?= $usuario["perfil"] == "Medico" ? "selected" : "" ?>
+                            >
+                                Médico
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <!-- BOTÕES -->
+                <div class="actions">
+
+                    <a
+                        href="index.php"
+                        class="btn btn-secondary"
+                    >
+                        Cancelar
+                    </a>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        Salvar Alterações
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<script src="../../../public/js/app.js"></script>
 
 </body>
 
 </html>
+```

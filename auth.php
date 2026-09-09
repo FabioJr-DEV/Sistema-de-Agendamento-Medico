@@ -2,7 +2,7 @@
 
 session_start();
 
-require_once __DIR__ . "../config/conexao.php";
+require_once __DIR__ . "/config/conexao.php";
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     header("Location: public/index.php");
@@ -39,12 +39,20 @@ if ($resultado->num_rows == 1) {
 }
 
 if (password_verify($senha, $usuario["senha"]))  {
-    
+
     $_SESSION["id"] = $usuario["id"];
     $_SESSION["nome"] = $usuario["nome"];
     $_SESSION["email"] = $usuario["email"];
     $_SESSION["perfil"] = $usuario["perfil"];
 
+    if (
+        $usuario["perfil"] === "Medico" &&
+        (int) $usuario["primeiro_acesso"] === 1
+    ) {
+        header("Location: templates/medico/alterar_senha.php");
+        exit;
+    }
+    
     header("Location: templates/painel-usuario.php");
     exit;
 
